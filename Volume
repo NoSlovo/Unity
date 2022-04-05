@@ -1,0 +1,58 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.Events;
+
+public class Alert : MonoBehaviour
+{
+     [SerializeField] private AudioSource _audioSource;
+     private float _target = 1f;
+     private float _maxData = 1f;
+
+    private void OnTriggerStay(Collider other)
+    {
+
+        if (other.TryGetComponent<Player>(out Player player))
+        {
+            StartCoroutine(PushValue());
+        } 
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.TryGetComponent<Player>(out Player player))
+        {
+            _audioSource.Play();
+        }
+    }
+
+    private void Start()
+    {
+        _audioSource = GetComponent<AudioSource>();
+    }
+
+    private void Update()
+    {
+        StartCoroutine(SubtractValue());
+    }
+
+    private IEnumerator PushValue()
+    {
+        StopCoroutine(SubtractValue());
+        for (float i = 0.00f; i <= _target;i++)
+        {
+            _audioSource.volume= Mathf.MoveTowards(_audioSource.volume, _target, _maxData * Time.deltaTime);
+        }
+
+        yield return null;
+    }
+
+    private IEnumerator SubtractValue()
+    {
+        StopCoroutine(PushValue());
+
+        _audioSource.volume = Mathf.MoveTowards(_audioSource.volume, _target, _maxData * Time.deltaTime * -1) ;
+
+        yield return  null;
+    }
+}
