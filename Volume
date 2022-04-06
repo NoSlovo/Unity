@@ -3,56 +3,53 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
+[RequireComponent(typeof(AudioSource))]
+
 public class Alert : MonoBehaviour
 {
-     [SerializeField] private AudioSource _audioSource;
-     private float _target = 1f;
-     private float _maxData = 1f;
+     private AudioSource _audioSource;
 
-    private void OnTriggerStay(Collider other)
-    {
-
-        if (other.TryGetComponent<Player>(out Player player))
-        {
-            StartCoroutine(PushValue());
-        } 
-    }
+     private float _targetMax = 1f;
+    private float _targetMin = 0;
+    private float _maxData = 1f;
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.TryGetComponent<Player>(out Player player))
+        if (other.GetComponent<Player>())
         {
+            StartCoroutine(PushValum());
             _audioSource.Play();
         }
     }
 
-    private void Start()
+    private void OnTriggerExit(Collider other)
     {
-        _audioSource = GetComponent<AudioSource>();
+         if (other.GetComponent<Player>())
+            {
+            StartCoroutine(ReduceValum());
+            }
     }
 
-    private void Update()
+    private IEnumerator PushValum()
     {
-        StartCoroutine(SubtractValue());
-    }
-
-    private IEnumerator PushValue()
-    {
-        StopCoroutine(SubtractValue());
-        for (float i = 0.00f; i <= _target;i++)
+        while (_audioSource.volume != _targetMax)
         {
-            _audioSource.volume= Mathf.MoveTowards(_audioSource.volume, _target, _maxData * Time.deltaTime);
+            _audioSource.volume = Mathf.MoveTowards(_audioSource.volume, _targetMax, _maxData * Time.deltaTime);
+            yield return new WaitForSeconds(0.01f);
         }
-
-        yield return null;
     }
 
-    private IEnumerator SubtractValue()
+    private IEnumerator ReduceValum()
+    {     
+        while (_audioSource.volume > _targetMin)
+        {
+            _audioSource.volume = Mathf.MoveTowards(_audioSource.volume, _targetMin, _maxData * Time.deltaTime);
+            yield return new WaitForSeconds(0.01f);
+        }
+    }
+
+    private void Awake()
     {
-        StopCoroutine(PushValue());
-
-        _audioSource.volume = Mathf.MoveTowards(_audioSource.volume, _target, _maxData * Time.deltaTime * -1) ;
-
-        yield return  null;
-    }
+       _audioSource = GetComponent<AudioSource>();
+    }  
 }
