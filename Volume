@@ -7,49 +7,83 @@ using UnityEngine.Events;
 
 public class Alert : MonoBehaviour
 {
-     private AudioSource _audioSource;
-     private float _maxData = 1f;
-     private float _target = 1f;
-
+    private Coroutine _pushController;
+    private Coroutine _decreaseController;
+    private AudioSource _audioSource;
+    private float _target;
+    private float _maxData = 1f;
+    
     private void OnTriggerEnter(Collider other)
     {
         if (other.TryGetComponent<Player>(out Player player))
         {
-            StartCoroutine(PushVolum());
+            PushController();
             _audioSource.Play();
         }
     }
 
     private void OnTriggerExit(Collider other)
     {
-        StartCoroutine(PushVolum());
+        if (other.TryGetComponent<Player>(out Player player))
+        {
+            DecreaseController();
+        }
     }
 
     private IEnumerator PushVolum()
     {
+        var waitForSecond = new WaitForSeconds(0.01f);
+        _target = 1f;
         if (_audioSource.volume != _target)
         {
             while (_audioSource.volume != _target)
             {
                 _audioSource.volume = Mathf.MoveTowards(_audioSource.volume, _target, _maxData * Time.deltaTime);
-                yield return new WaitForSeconds(0.01f);
+                yield return waitForSecond;
             }
         }
+    }
 
-        if (_audioSource.volume == _target)
+    private void PushController()
+    {
+        if (_pushController != null)
         {
-            _target = 0;
+            StopCoroutine(PushVolum());
+        }
+        else
+        {
+            _pushController = StartCoroutine(PushVolum());
+        }
+    }
 
+    private void DecreaseController()
+    {
+        if (_decreaseController != null)
+        {
+            StopCoroutine(DecreaseVolume());
+        }
+        else
+        {
+            _decreaseController = StartCoroutine(DecreaseVolume());
+        }
+    }
+
+    private IEnumerator DecreaseVolume()
+    {
+        var waitForSecond = new WaitForSeconds(0.01f);
+        _target = 0f;
+        if (_audioSource.volume != _target)
+        {
             while (_audioSource.volume != _target)
             {
                 _audioSource.volume = Mathf.MoveTowards(_audioSource.volume, _target, _maxData * Time.deltaTime);
-                yield return new WaitForSeconds(0.01f);
+                yield return waitForSecond;
             }
         }
     }
 
     private void Awake()
     {
-       _audioSource = GetComponent<AudioSource>();
-    }  
+        _audioSource = GetComponent<AudioSource>();
+    }
 }
