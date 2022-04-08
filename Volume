@@ -1,28 +1,25 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Events;
 
 [RequireComponent(typeof(AudioSource))]
 
-public class Alert : MonoBehaviour
+public class Siren : MonoBehaviour
 {
     private Coroutine _pushController;
     private AudioSource _audioSource;
 
-
-    private void OnTriggerEnter(Collider other)
+    private void OnTriggerEnter(Collider door)
     {
-        if (other.TryGetComponent<Player>(out Player player))
+        if (door.TryGetComponent<Thief>(out Thief player))
         {
             ChangeVolume(1);
             _audioSource.Play();
         }
     }
 
-    private void OnTriggerExit(Collider other)
+    private void OnTriggerExit(Collider door)
     {
-        if (other.TryGetComponent<Player>(out Player player))
+        if (door.TryGetComponent<Thief>(out Thief player))
         {
             StopCoroutine(PushVolum(1));
             ChangeVolume(0);
@@ -33,6 +30,7 @@ public class Alert : MonoBehaviour
     {
         float minVolume = 0;
         float maxData = 1f;
+
         if (target == minVolume || target == maxData)
         {  
             var waitForSecondsRealtime = new WaitForSecondsRealtime(0.001f);
@@ -43,6 +41,7 @@ public class Alert : MonoBehaviour
             }
             _pushController = null;
         }
+
     }
 
     private void ChangeVolume(float target)
@@ -56,9 +55,6 @@ public class Alert : MonoBehaviour
             _pushController = StartCoroutine(PushVolum(target));
         }
     }
-
-
-
 
     private void Awake()
     {
