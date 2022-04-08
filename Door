@@ -1,0 +1,23 @@
+using UnityEngine;
+
+
+public class Door : MonoBehaviour
+{
+    [SerializeField] private Siren _siren;
+    
+    private void OnTriggerEnter(Collider door)
+    {
+        if (door.TryGetComponent<Thief>(out Thief player))
+        {
+           _siren.ChangeVolume(1);
+        }
+    }
+
+    private void OnTriggerExit(Collider door)
+    {
+        if (door.TryGetComponent<Thief>(out Thief player))
+        {
+            _siren.ChangeVolume(0);
+        }
+    }
+}
