@@ -15,7 +15,7 @@ public class Alert : MonoBehaviour
     {
         if (other.TryGetComponent<Player>(out Player player))
         {
-            CoroutineController(1);
+            ChangeVolume(1);
             _audioSource.Play();
         }
     }
@@ -25,7 +25,7 @@ public class Alert : MonoBehaviour
         if (other.TryGetComponent<Player>(out Player player))
         {
             StopCoroutine(PushVolum(1));
-            CoroutineController(0);
+            ChangeVolume(0);
         }
     }
 
@@ -35,16 +35,17 @@ public class Alert : MonoBehaviour
         float maxData = 1f;
         if (target == minVolume || target == maxData)
         {  
+            var waitForSecondsRealtime = new WaitForSecondsRealtime(0.001f);
             while (_audioSource.volume != target)
             {
                 _audioSource.volume = Mathf.MoveTowards(_audioSource.volume, target, maxData * Time.deltaTime);
-                yield return new WaitForSecondsRealtime(0.001f);
+                yield return waitForSecondsRealtime;
             }
             _pushController = null;
         }
     }
 
-    private void CoroutineController(float target)
+    private void ChangeVolume(float target)
     {
         if (_pushController != null)
         {
