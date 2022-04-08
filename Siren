@@ -1,0 +1,45 @@
+using System.Collections;
+using UnityEngine;
+
+[RequireComponent(typeof(AudioSource))]
+
+public class Siren : MonoBehaviour
+{
+    private Coroutine _pushController;
+    private AudioSource _audioSource;
+
+    private IEnumerator PushVolum(float target)
+    {
+        float minVolume = 0;
+        float maxData = 1f;
+
+        if (target == minVolume || target == maxData)
+        {  
+            var waitForSecondsRealtime = new WaitForSecondsRealtime(0.001f);
+            while (_audioSource.volume != target)
+            {
+                _audioSource.volume = Mathf.MoveTowards(_audioSource.volume, target, maxData * Time.deltaTime);
+                yield return waitForSecondsRealtime;
+            }
+            _pushController = null;
+        }
+    }
+
+    public void ChangeVolume(float target)
+    {
+        _audioSource.Play();
+        if (_pushController != null)
+        {
+            StopCoroutine(PushVolum(target));
+        }
+        else
+        {
+            _pushController = StartCoroutine(PushVolum(target));
+        }
+    }
+
+    private void Awake()
+    {
+        _audioSource = GetComponent<AudioSource>();
+    }
+}
